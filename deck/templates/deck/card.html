@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Deck</title>
+
+	<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}deck/card.css?t={% now 'Hiu' %}">
+
+	<script type="text/javascript">
+		{% for image in card.images %}
+			window.top.createOverlay("{{image.name}}", "{{image.url}}");
+		{% endfor %}
+	</script>
+
+	{% include "assets.html" %}
+</head>
+<body>
+	<div id="card-container">
+		{{ card.html|safe }}
+	</div>
+
+	<div id="card-name">{{ card.url }}</div>
+</body>
+</html>

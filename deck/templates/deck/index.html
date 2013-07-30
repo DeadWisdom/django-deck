@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Deck</title>
+
+	{% block head %}
+		{% include "deck/assets.html" %}
+	{% endblock %}
+
+	<script type="text/javascript" src="{{ STATIC_URL }}deck/jquery.js"></script>
+	<script type="text/javascript" src="{{ STATIC_URL }}deck/jquery.cookie.js"></script>
+	<script type="text/javascript" src="{{ STATIC_URL }}deck/index.js"></script>
+	<script type="text/javascript" src="{{ STATIC_URL }}deck/overlay.js"></script>
+</head>
+<body>
+	<div class="menu">
+		<h1>deck</h1>
+		{% include "deck/group.html" %}
+	</div>
+
+	<div class="options">
+		<h1>options</h1>
+		<div class="field">
+			<input type="checkbox" id="snapToGrid"> Snap to grid
+		</div>
+	</div>
+
+	<iframe name="frame" id="frame" seamless="seamless"></iframe>
+
+	{% block foot %}
+	{% endblock %}
+</body>
+</html>

@@ -1,0 +1,6 @@
+/env
+/build
+/dist
+/django_discourse.egg-info
+.DS_Store
+*.pyc

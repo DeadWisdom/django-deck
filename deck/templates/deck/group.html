@@ -1,0 +1,14 @@
+<div class="files">
+	{% for child in group.groups %}
+		<h3>{{ child.name }}</h3>
+		{% with group=child template="deck/group.html" %}
+            {% include template %}
+        {% endwith %}
+	{% endfor %}
+
+	{% for card in group.cards %}
+		<a href="#/{{card.relative}}" class="card">
+			{{card.name}}
+		</a>
+	{% endfor %}
+</div>
