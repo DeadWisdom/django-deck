@@ -14,7 +14,7 @@ OverlayMaster.prototype.onMouseMove = function(e) {
         top: e.pageY - this.dragging.y,
         left: e.pageX - this.dragging.x
     };
-
+   	
     this.setPosition(name, pos);
 }
 

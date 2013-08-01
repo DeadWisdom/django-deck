@@ -16,6 +16,7 @@
 	<div class="menu">
 		<h1>deck</h1>
 		{% include "deck/group.html" %}
+		<p>&nbsp;</p>
 	</div>
 
 	<div class="options">
@@ -25,7 +26,9 @@
 		</div>
 	</div>
 
-	<iframe name="frame" id="frame" seamless="seamless"></iframe>
+	<div class="workspace">
+		<iframe name="frame" id="frame" seamless="seamless"></iframe>
+	</div>
 
 	{% block foot %}
 	{% endblock %}
