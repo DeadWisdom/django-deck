@@ -6,7 +6,20 @@ body {
 	font-size: 14px;
 }
 
-.menu, .options {
+.layer-menu {
+    background: white;
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    width: 200px;
+    overflow: auto;
+    border-right: 1px solid #CCC;
+    z-index: 1000;
+    overflow: auto;
+    padding-left: 0px;
+}
+
+.menu {
 	background: white;
 	position: fixed;
 	left: 0;
@@ -15,31 +28,152 @@ body {
 	width: 350px;
 	overflow: auto;
 	border-right: 1px solid #CCC;
-	z-index: 100;
+	z-index: 1000;
 	overflow: auto;
+	left: -320px;
+	padding-left: 0px;
 }
 
-.menu a {
-	color: #33AA33;
-	text-decoration: none;
-	text-transform: lowercase;
-	padding: 4px 10px;
-	display: block;
-	font-size: 14px;
+.menu .t-button {
+    color: #666;
+    text-decoration: none;
+    text-transform: lowercase;
+    display: block;
+    padding: 4px 6px;
+    cursor: pointer;
 }
 
-.menu a:hover {
-	background-color: #F5FFF5;
+.menu .principal > .t-text, .menu .principal > .t-tick {
+    display: none;
 }
 
-.options {
+.card-search {
+    position: relative;
+}
+
+.card-search input {
+    font-size: 15px;
+    padding: 5px 4px;
+    border: 1px solid #AAA;
+    width: 329px;
+    margin: 0px 5px 2px;
+}
+
+.card-search .t-button {
+    position: absolute;
+    top: 1px;
+    right: 5px;
+}
+
+.card-search .t-icon {
+    height: 20px;
+    width: 20px;
+    background: transparent url("images/icon-cancel.png") no-repeat center center;
+}
+
+.card-search .t-text {
+    display: none;
+}
+
+.hidden .card-search {
+    display: none;
+}
+
+.t-tree .t-text {
+    height: 20px;
+    line-height: 20px;
+    font-size: 14px;
+}
+
+.t-tree .t-button {
+    padding-left: 30px;
+}
+
+.t-tree .t-tree {
+    padding-left: 20px;
+}
+
+.t-tree .t-tick {
+    float: left;
+    width: 20px;
+    height: 20px;
+    background: transparent url("images/tick-down.png") no-repeat center;
+}
+
+.t-collapsed .t-tail {
+    display: none;
+}
+
+.t-collapsed .t-tick {
+    background: transparent url("images/tick-right.png") no-repeat center;
+}
+
+.hud {
+    z-index: 100;
+}
+
+.hud .t-button {
+    float: left;
+    margin-right: 10px;
+    border: 1px solid #AAA;
+    background-color: white;
+    font-size: 14px;
+    color: #666;
+}
+
+.hud .t-button .t-icon {
+    width: 24px;
+    height: 24px;
+    float: left;
+    margin: 4px 0px 2px 6px;
+    background-color: #666;
+    background: transparent url("images/camera-icon.png") no-repeat top left;
+}
+
+.icon-invalid { background-image: url("images/alert-icon.png") !important; }
+.icon-left { background-image: url("images/icon-left.png") !important; }
+.icon-right { background-image: url("images/icon-right.png") !important; }
+.icon-refresh { background-image: url("images/icon-refresh.png") !important; }
+.icon-arrange { background-image: url("images/icon-arrange.png") !important; }
+.icon-cancel { background-image: url("images/icon-cancel.png") !important; }
+
+.hud .t-button .t-text {
+    padding: 8px 8px 8px 0px;
+    margin-left: 34px;
+}
+
+.hud .short .t-text {
+    display: none;
+}
+
+.hud .short .t-icon {
+    margin: 4px;
+}
+
+.hud .t-button:hover {
+    background-color: #F0F0F0;
+    cursor: pointer;
+}
+
+.hidden {
+	padding-left: 0;
+	z-index: 900;
+}
+
+#option-menu {
 	top: auto;
-	height: 130px;
+	height: 33%;
 	border-top: 1px solid #CCC;
 }
 
-.options .field {
-	padding: 6px 12px;
+#overlay-menu {
+	top: auto;
+	height: 66%;
+	border-top: 1px solid #CCC;
+}
+
+.field {
+	padding: 6px 12px 6px 30px;
 }
 
 h1 {
@@ -71,32 +205,10 @@ h3:hover {
 	background-color: #F5FFF5;
 }
 
-.files a, .files h3 {
-	padding-left: 40px !important;
-}
-
-.files .files a, .files .files h3 {
-	padding-left: 50px !important;
-}
-
-.files .files .files a, .files .files .files h3 {
-	padding-left: 60px !important;
-}
-
-.files .files .files .files a, .files .files .files .files h3 {
-	padding-left: 70px !important;
-}
-
-
-#frame {
-	position: absolute;
-	left: 0;
-	top: 0;
-	bottom: 0;
-	right: 0;
-	height: 100%;
-	width: 100%;
-	z-index: 1;
+iframe {
+	border: none;
+	display: none;
+	z-index: 0;
 }
 
 .mask {
@@ -105,18 +217,18 @@ h3:hover {
 	top: 0;
 	bottom: 0;
 	right: 0;
-	z-index: 2;
+	z-index: 2000;
 	background-color: transparent;
 }
 
-.overlay {
+.layer {
 	position: absolute;
 	z-index: 3;
-	cursor: pointer;
+	cursor: default;
 	padding-bottom: 20px;
 }
 
-.overlay .name {
+.layer .name {
 	display: none;
 	position: absolute;
 	bottom: 6px;
@@ -124,28 +236,143 @@ h3:hover {
 	color: #888;
 }
 
-.opacity-line {
+.opaciter {
 	display: none;
 	position: absolute;
-	height: 4px;
-	right: 6px;
-	bottom: 8px;
+	width: 10px;
+    left: -17px;
+    background: transparent !important;
 }
 
-.opacity-box {
+.opaciter .box {
 	background-color: #444;
-	width: 10px;
+	width: 12px;
 	height: 14px;
 	top: 0;
-	margin-right: 5px;
 	float: left;
+    position: static;
 }
 
-.overlay:hover .name, .overlay:hover .opacity-line {
+.layer:hover .opaciter {
 	display: block;
 }
 
 #djDebug {
 	display: none;
 	visibility: hidden;
+}
+
+#loading {
+	position: fixed;
+	bottom: 10px;
+	right: 20px;
+	height: 24px;
+	color: #AAA;
+	font-size: 20px;
+	padding-left: 22px;
+	background: transparent url("images/loading.gif") no-repeat left;
+}
+
+.scaffold {
+	display: block;
+	width: 1px;
+	height: 1px;
+	position: absolute;
+	z-index: 900;
+}
+
+.transform {
+	z-index: 1000;
+}
+
+.scaffold > div {
+	position: absolute;
+	background: transparent;
+}
+
+.scaffold .top {
+	cursor: move;
+}
+
+.scaffold .right {
+	cursor: ew-resize;
+}
+
+.scaffold .bottom {
+	cursor: ns-resize;
+}
+
+.scaffold:hover > div, .transform > div {
+	display: block;
+	background: #AAA;
+}
+
+.scaffold .corner, .scaffold:hover .corner {
+	cursor: nwse-resize;
+	background: transparent;
+}
+
+.scaffold .mask, .scaffold:hover .mask {
+	display: none;
+	background: transparent;
+	z-index: 2;
+}
+
+.transform .mask, .transform:hover .mask {
+	z-index: 1000;
+	display: block;
+	background: rgba(0, 0, 0, .1);
+}
+
+.scaffold span {
+	display: none;
+	font-size: 12px;
+	color: #666;
+}
+
+.scaffold .auto {
+	z-index: 2;
+	display: none;
+	cursor: pointer;
+	width: 22px;
+	height: 22px;
+	float: right;
+	background: transparent url("images/autosize.png") no-repeat center;
+}
+
+.scaffold .dim {
+	display: none !important;
+}
+
+.transform .dim {
+	display: block !important;
+}
+
+.scaffold:hover span, .transform span  {
+	display: block;
+}
+
+.scaffold .title {
+	line-height: 24px;
+	padding-left: 6px;
+	color: white;
+	z-index: 1;
+}
+
+.layer-button {
+    padding: 4px 6px;
+    display: block;
+    cursor: pointer;
+}
+
+.layer-button .checkbox {
+    float: left;
+}
+
+.layer-button .t-text {
+    font-size: 16px;
+}
+
+.layer-button:hover {
+    background: #f5f5f5;
 }

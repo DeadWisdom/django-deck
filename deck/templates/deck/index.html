@@ -7,28 +7,30 @@
 		{% include "deck/assets.html" %}
 	{% endblock %}
 
-	<script type="text/javascript" src="{{ STATIC_URL }}deck/jquery.js"></script>
-	<script type="text/javascript" src="{{ STATIC_URL }}deck/jquery.cookie.js"></script>
-	<script type="text/javascript" src="{{ STATIC_URL }}deck/index.js"></script>
-	<script type="text/javascript" src="{{ STATIC_URL }}deck/overlay.js"></script>
+	<script type="text/javascript" src="{{ STATIC_URL }}deck/lib/jquery.js"></script>
+	<script type="text/javascript" src="{{ STATIC_URL }}deck/lib/jquery.cookie.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}deck/lib/tea.js"></script>
+
+    <script type="text/javascript" src="{{ STATIC_URL }}deck/menu.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}deck/card.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}deck/hud.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}deck/scaffold.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}deck/manager.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}deck/layer.js"></script>
+
+	<!--script type="text/javascript" src="{{ STATIC_URL }}deck/overlay.js"></script>
+	<script type="text/javascript" src="{{ STATIC_URL }}deck/handles.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}deck/scaffold.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}deck/card.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}deck/manager.js"></script-->
+
+    <script type="text/javascript">
+        Deck = {{group.json|safe}};
+    </script>
 </head>
 <body>
-	<div class="menu">
-		<h1>deck</h1>
-		{% include "deck/group.html" %}
-		<p>&nbsp;</p>
-	</div>
-
-	<div class="options">
-		<h1>options</h1>
-		<div class="field">
-			<input type="checkbox" id="snapToGrid"> Snap to grid
-		</div>
-	</div>
-
-	<div class="workspace">
-		<iframe name="frame" id="frame" seamless="seamless"></iframe>
-	</div>
+	
+    <iframe src="{% url 'container' %}"></iframe>
 
 	{% block foot %}
 	{% endblock %}

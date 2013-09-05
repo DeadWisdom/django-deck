@@ -1,40 +1,97 @@
-import os, mimetypes
+import os, mimetypes, urllib
 
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.shortcuts import render, get_object_or_404, render_to_response, redirect
-from django.template.loader import Template
+from django.template.loader import Template, get_template, TemplateDoesNotExist
 from django.template import RequestContext
 from django.conf import settings
+from phantom import take_shots
 
 from models import Card, CardGroup
 
+### Helpers ###
+def get_overlay_path(path, name):
+    prefix = getattr(settings, 'DECK_PREFIX', 'decks/')
+    try:
+        template = get_template("%s%s" % (prefix, path))
+    except TemplateDoesNotExist:
+        raise Http404
+    base, _ = os.path.splitext(template.origin.name)
+    for ext in ('png', 'jpg', 'jpeg', 'gif'):
+        path = "%s_%s.png" % (base, name)
+        if os.path.exists(path):
+            return path
+    raise Http404
 
+
+### Views ###
 def index(request):
-	DECK_PATH = os.path.abspath( getattr(settings, 'DECK_PATH', 'decks') )
-	group = CardGroup( DECK_PATH )
-	return render(request, "deck/index.html", locals())
+    DECK_PATH = os.path.abspath( getattr(settings, 'DECK_PATH', 'decks') )
+    group = CardGroup( DECK_PATH )
+    return render(request, "deck/index.html", locals())
+
+
+def overlay(request, path):
+    DECK_PATH = os.path.abspath( getattr(settings, 'DECK_PATH', 'decks') )
+    path = os.path.abspath( os.path.join(DECK_PATH, path) )
+    if not os.path.exists(path) or not path.startswith(DECK_PATH):
+        raise Http404
+    mime = mimetypes.guess_type(path)[0]
+    with open(path) as file:
+        return HttpResponse(file.read(), mimetype=mime)
 
 
 def card(request, path):
-	DECK_PATH = os.path.abspath( getattr(settings, 'DECK_PATH', 'decks') )
-	path = os.path.join(DECK_PATH, path)
-	mime = mimetypes.guess_type(path)[0]
-	if mime.startswith('image/'):
-		with open(path) as file:
-			return HttpResponse(file.read(), mimetype=mime)
-	card, _ = Card.objects.get_or_create(path=path)
-	template = Template( card.source )
-	context = RequestContext( request, locals() )
-	card.html = template.render( context )
-	if (request.GET.get('exact') == 'yes'):
-		return render(request, "deck/exact.html", locals())
-	else:
-		return render(request, "deck/card.html", locals())
+    DECK_PATH = os.path.abspath( getattr(settings, 'DECK_PATH', 'decks') )
+    path = os.path.join(DECK_PATH, path)
+    if not os.path.exists(path) or not path.startswith(DECK_PATH):
+        raise Http404
+    mime = mimetypes.guess_type(path)[0]
+    if mime.startswith('image/'):
+        with open(path) as file:
+            return HttpResponse(file.read(), mimetype=mime)
+    card, _ = Card.objects.get_or_create(path=path)
+    template = Template( card.source )
+    context = RequestContext( request, locals() )
+    card.html = template.render( context )
+    response = render(request, "deck/exact.html", locals())
+    response['images'] = ";".join(
+        [ "%s=%s" % (image['name'], image['url']) for image in card.images ]
+    )
+    response['name'] = card.name
+    response['path'] = card.relative
+    return response
 
 
-def render_card(request, slug):
-	card, _ = Card.objects.get_or_create(slug=slug)
-	template = Template( card.source )
-	context = Context( locals() )
-	source = template.render( context )
-	return render(request, "deck/render.html", locals())
+def render_card(request, path):
+    card, _ = Card.objects.get_or_create(path=path)
+    template = Template( card.source )
+    context = Context( locals() )
+    source = template.render( context )
+    return render(request, "deck/render.html", locals())
+
+
+def build_snapshots(request):
+    host = request.get_host()
+    path = request.GET.get('path')
+    if (path):
+        DECK_PATH = os.path.abspath( getattr(settings, 'DECK_PATH', 'decks') )
+        path = os.path.join(DECK_PATH, path)
+        qs = Card.objects.filter(path=path)
+    else:
+        qs = Card.objects.all()
+
+    cards = {}
+    for card in qs:
+        url = "http://%s/%s" % (host, card.url)
+        cards[url] = card
+
+    for url, src in take_shots(cards.keys()):
+        url = url.replace(" ", "%20")
+        cards[url].save_shot(src)
+
+    return HttpResponse("Ok")
+
+
+def container(request):
+    return render(request, "deck/container.html", locals())
