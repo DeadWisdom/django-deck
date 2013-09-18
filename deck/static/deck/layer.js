@@ -11,8 +11,14 @@ LayerButton = Tea.Button.extend({
     },
     handlePress : function(e) {
         if (e.target == this._check[0]) return this.toggle();
-        window.manager.bringForward(this.subject);
+
+        if (!this._check.prop('checked')) {
+            this._check.prop('checked', 'checked');
+            this.toggle();
+        }
+    
         this.subject.source.hide().fadeIn();
+        window.manager.bringForward(this.subject);
     },
     toggle : function() {
         var checked = this._check.prop('checked');
@@ -29,6 +35,7 @@ LayerMenu = Tea.Container.extend({
     init : function() {
         this.__super__();
         this.source.appendTo(document.body);
+        this.insertAfter = $('<h2>Layers</h2>').appendTo(this.source);
     },
     addLayer : function(name, subject) {
         this.append({
@@ -55,7 +62,11 @@ Layer = Tea.Element.extend({
         this.scaffold = Scaffold({subject: this, name: this.name});
 
         this.source.appendTo(document.body);
-        this._loaded = false;
+    },
+    setValue : function(src) {
+        this.source.attr('src', null);
+        this.source.attr('src', src + "?t=" + (new Date).getTime());
+        this.src = src;
     },
     teardown : function() {
         this.destroy();
@@ -97,11 +108,13 @@ Layer = Tea.Element.extend({
     hide : function() {
         this.hidden = true;
         this.source.hide();
+        this.scaffold.hide();
         window.manager.saveValue(this.src + ":hidden", true);
     },
     show : function() {
         this.hidden = false;
         this.appear();
+        this.scaffold.show();
         window.manager.saveValue(this.src + ":hidden", '');
     },
     getId : function() {

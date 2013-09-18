@@ -1,7 +1,8 @@
-import os, json
+import os, json, base64
 from django.db import models
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.core.files.base import ContentFile
 from phantom import take_shots
 
 
@@ -21,28 +22,45 @@ class Card(models.Model):
     path = models.CharField(max_length=255)
     cache = models.TextField(blank=True)
 
-    thumbnail = models.ImageField(blank=True, null=True, upload_to='deck_thumbnails')
     shot = models.ImageField(blank=True, null=True, upload_to='deck_shots')
-    ideal = models.ImageField(blank=True, null=True, upload_to='deck_ideals')
-    mockup = models.ImageField(blank=True, null=True, upload_to='deck_mockups')
-
     modified = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
         return self.name
 
     def save_shot(self, src):
-        from django.core.files.base import ContentFile
         name = os.path.splitext( os.path.basename(self.path) )[0]
         name = "%s-shot.png" % name
         self.shot.save(name, ContentFile(src))
+        if (self.cache == ''):
+            self.cache = base64.b64encode( src )
+            self.save()
+        return self.shot.url
+
+    def validate(self):
+        if self.shot:
+            self.cache = base64.b64encode( self.shot.read() )
+        else:
+            self.cache = ''
+        self.save()
+
+    def invalidate(self):
+        self.cache = ''
+        self.save()
+
+    def is_valid(self):
+        if not self.shot:
+            return None
+        src = base64.b64encode( self.shot.read() )
+        return self.cache == src
 
     def simple(self):
         return {
             'path': self.relative,
             'name': self.name,
             'url': self.url,
-            'images': list(self.images)
+            'images': list(self.images),
+            'is_valid': self.is_valid()
         }
 
     @property
@@ -64,24 +82,17 @@ class Card(models.Model):
 
     @property
     def images(self):
-        if self.mockup:
-            yield {'name': 'mockup', 'url': self.mockup.url}
-        else:
-            # Look for an image with our same name in our directory as a mockup
-            target_base, _ = os.path.splitext(self.name)
-            home = os.path.dirname(self.path)
-            for filename in os.listdir(home):
-                base, ext = os.path.splitext(filename)
-                if base == target_base and ext in ('.jpg', '.png', '.gif', '.jpeg'):
-                    path = relative_path( os.path.join(home, filename) )
-                    yield {'name': 'mockup', 'url': reverse("card", args=[path])}
-                    break
+        # Look for an image with our same name in our directory as a mockup
+        target_base, _ = os.path.splitext(self.name)
+        home = os.path.dirname(self.path)
+        for filename in os.listdir(home):
+            base, ext = os.path.splitext(filename)
+            if base == target_base and ext in ('.jpg', '.png', '.gif', '.jpeg'):
+                path = relative_path( os.path.join(home, filename) )
+                yield {'name': 'mockup', 'url': reverse("card", args=[path])}
+                break
         if self.shot:
             yield {'name': 'shot', 'url': self.shot.url}
-        if self.ideal:
-            yield {'name': 'ideal', 'url': self.ideal.url}
-        if self.thumbnail:
-            yield {'name': 'thumbnail', 'url': self.thumbnail.url}
         return
 
 

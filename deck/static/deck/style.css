@@ -17,6 +17,23 @@ body {
     z-index: 1000;
     overflow: auto;
     padding-left: 0px;
+    border-top: 1px solid #CCC;
+    border-left: 1px solid #CCC;
+}
+
+.layer-menu .t-button {
+    padding: 6px 8px;
+    border: none;
+    float: none;
+}
+
+.layer-menu .t-icon {
+    display: none;
+}
+
+.layer-menu .t-text {
+    margin-left: 22px;
+    margin-top: -1px;
 }
 
 .menu {
@@ -34,17 +51,43 @@ body {
 	padding-left: 0px;
 }
 
-.menu .t-button {
+.menu .t-tail .t-button {
     color: #666;
     text-decoration: none;
     text-transform: lowercase;
     display: block;
     padding: 4px 6px;
     cursor: pointer;
+    border: none;
+    float: none;
+    padding-left: 10px;
+}
+
+.menu .t-tail .t-tail .t-button {
+    padding-left: 30px;
+}
+
+.menu .t-tail .t-icon {
+    display: none
 }
 
 .menu .principal > .t-text, .menu .principal > .t-tick {
     display: none;
+}
+
+.menu .global {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    cursor: pointer;
+}
+
+.menu .global .t-text {
+    margin-left: 34px;
+    margin-top: 8px;
+    margin-right: 8px;
+    display: block;
+    text-transform: lowercase;
 }
 
 .card-search {
@@ -108,20 +151,21 @@ body {
     background: transparent url("images/tick-right.png") no-repeat center;
 }
 
-.hud {
-    z-index: 100;
+.hud div {
+    z-index: 800;
 }
 
-.hud .t-button {
+.t-button {
     float: left;
     margin-right: 10px;
     border: 1px solid #AAA;
     background-color: white;
     font-size: 14px;
     color: #666;
+    z-index: 800;
 }
 
-.hud .t-button .t-icon {
+.t-button .t-icon {
     width: 24px;
     height: 24px;
     float: left;
@@ -130,12 +174,26 @@ body {
     background: transparent url("images/camera-icon.png") no-repeat top left;
 }
 
+.disabled {
+    background-color: #F5F5F5;
+    cursor: wait !important;
+    border: 1px solid #DDD;
+}
+
 .icon-invalid { background-image: url("images/alert-icon.png") !important; }
+.icon-valid { background-image: url("images/icon-valid.png") !important; }
 .icon-left { background-image: url("images/icon-left.png") !important; }
 .icon-right { background-image: url("images/icon-right.png") !important; }
 .icon-refresh { background-image: url("images/icon-refresh.png") !important; }
 .icon-arrange { background-image: url("images/icon-arrange.png") !important; }
 .icon-cancel { background-image: url("images/icon-cancel.png") !important; }
+.icon-mobile { background-image: url("images/icon-mobile.png") !important; }
+.icon-tablet { background-image: url("images/icon-tablet.png") !important; }
+.icon-desktop { background-image: url("images/icon-desktop.png") !important; }
+.icon-loading { 
+    background-image: url("images/loading.gif") !important; 
+    background-position: 5px 4px !important;
+}
 
 .hud .t-button .t-text {
     padding: 8px 8px 8px 0px;
@@ -153,6 +211,10 @@ body {
 .hud .t-button:hover {
     background-color: #F0F0F0;
     cursor: pointer;
+}
+
+.hud .invalid-button {
+    background-color: #FFDDDD;
 }
 
 .hidden {
@@ -176,11 +238,16 @@ body {
 	padding: 6px 12px 6px 30px;
 }
 
-h1 {
+h1, h2 {
 	font-size: 24px;
 	color: #666;
 	margin: 0;
 	padding: 8px 8px 4px;
+    text-transform: lowercase;
+}
+
+h2 {
+    font-size: 18px;
 }
 
 .hidden h1 {
@@ -344,11 +411,11 @@ iframe {
 	display: none !important;
 }
 
-.transform .dim {
+.dragging .dim {
 	display: block !important;
 }
 
-.scaffold:hover span, .transform span  {
+.scaffold:hover span {
 	display: block;
 }
 

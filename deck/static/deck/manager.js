@@ -7,7 +7,10 @@ CardManager = Tea.Class({
         this.currentUrl = null;
         this.card = Card();
         this.layers = [];
+        this.layerMap = {};
         this.layerMenu = LayerMenu();
+        this.hud = HUD();
+        this.menu = CardMenu();
 
         setInterval(jQuery.proxy(this.loadCardByHash, this), 1000);
 
@@ -19,8 +22,8 @@ CardManager = Tea.Class({
     },
     loadCard : function(url) {
         if (this.currentUrl == url) return;
-        this.currentUrl = url;
         this.teardown();
+        this.currentUrl = url;
 
         $('#loading').fadeIn('fast');
 
@@ -42,6 +45,7 @@ CardManager = Tea.Class({
         while(this.layers.length > 0) {
             this.layers.pop().teardown();
         }
+        this.layerMap = {};
     },
     loadSuccess : function(html, status, xhr) {
         if (!this.card.ready)
@@ -49,6 +53,7 @@ CardManager = Tea.Class({
 
         var path = xhr.getResponseHeader('path');
         var images = xhr.getResponseHeader('images');
+        var is_valid = (xhr.getResponseHeader('is_valid') == 'yes');
 
         $('#loading').hide();
 
@@ -63,15 +68,25 @@ CardManager = Tea.Class({
         this.layerMenu.empty();
         this.layerMenu.addLayer("card", this.card);
 
-        var images = images.split(';');
-        for(var i = 0; i < images.length; i++) {
-            var im = images[i].split('=');
-            this.addOverlay(im[0], im[1]);
+        this.hud.buttons.validate.setValue(is_valid);
+
+        if (images) {
+            var images = images.split(';');
+            for(var i = 0; i < images.length; i++) {
+                var im = images[i].split('=');
+                this.addOverlay(im[0], im[1]);
+            }
         }
     },
     addOverlay : function(name, url) {
-        var hidden = this.loadValue(url + ":hidden") ? true : false;
-        var layer = Layer({ name: name, src: url, hidden: hidden });
+        var existing = this.layerMap[name];
+        if (existing) {
+            existing.setValue(url);
+            return;
+        }
+        var hidden = this.loadValue(url + ":hidden") ? true : null;
+        if (hidden == null && name == 'shot') hidden = true;
+        var layer = this.layerMap[name] = Layer({ name: name, src: url, hidden: hidden });
         this.layers.push( layer );
         this.layerMenu.addLayer(name, layer);
     },
@@ -160,17 +175,6 @@ CardManager = Tea.Class({
             this.layers.push(layers[i]);
         }
     },
-    build_snapshot_for_current : function() {
-        var path = this.card.name;
-        $.ajax({
-            url: '/deck/build_snapshots/',
-            data: {path: this.card.name},
-            success: function() {
-                console.log("Done!");
-            }
-        })
-        console.log();
-    },
     bringForward : function(obj) {
         for(var i = 0, len = this.layers.length; i < len; i++) {
             if (obj == this.layers[i]) {
@@ -184,9 +188,100 @@ CardManager = Tea.Class({
             this.layers[i].source.css('z-index', i);
             this.layers[i].scaffold.source.css('z-index', 200 + i);
         }
+    },
+    build_snapshot_for_current : function() {
+        var path = this.card.name;
+        $.ajax({
+            url: '/deck/build_snapshots/',
+            data: {path: this.card.name},
+            context: this,
+            success: function(urls) {
+                for(var i = 0; i < urls.length; i++)
+                    this.addOverlay("shot", urls[i]);
+            },
+            complete : function(xhr) {
+                var is_valid = (xhr.getResponseHeader('is_valid') == 'yes');
+                this.hud.buttons.validate.setValue(is_valid);
+                
+                this.hud.buttons.snap.setIcon('snapshot');
+                this.hud.buttons.snap.setText("build snapshot");
+                this.hud.buttons.snap.enable();
+            },
+            error : function() {
+                alert("Snapshot was unnable to build.");
+            }
+        });
+
+        this.hud.buttons.snap.setIcon('loading');
+        this.hud.buttons.snap.setText("building...");
+        this.hud.buttons.snap.disable();
+    },
+    build_all_snapshots : function() {
+        $.ajax({
+            url: '/deck/build_snapshots/',
+            context: this,
+            success: function(cards) {
+                console.log(cards);
+            },
+            complete : function(xhr) {
+                this.hud.buttons.snap.enable();
+
+                this.menu.verify.setIcon('snapshot');
+                this.menu.verify.setText("verify all");
+                this.menu.verify.enable();
+            },
+            error : function() {
+                alert("Unnable to talk to server.");
+            }
+        });
+
+        this.hud.buttons.snap.disable();
+
+        this.menu.verify.setIcon('loading');
+        this.menu.verify.setText("verifying...");
+        this.menu.verify.disable();
+    },
+    invalidate : function() {
+        this.hud.buttons.validate.disable();
+        this.hud.buttons.validate.setIcon('loading');
+
+        $.ajax({
+            url: '/deck/invalidate/',
+            data: {path: this.card.name},
+            context: this,
+            success: function() {
+                this.hud.buttons.validate.setValue(false);
+            },
+            complete : function() {
+                this.hud.buttons.validate.enable();
+            },
+            error : function() {
+                alert("Could not talk to the server.");
+            }
+        });
+    },
+    validate : function() {
+        this.hud.buttons.validate.disable();
+        this.hud.buttons.validate.setIcon('loading');
+
+        $.ajax({
+            url: '/deck/validate/',
+            data: {path: this.card.name},
+            context: this,
+            success: function() {
+                this.hud.buttons.validate.setValue(true);
+            },
+            complete : function() {
+                this.hud.buttons.validate.enable();
+            },
+            error : function() {
+                alert("Could not talk to the server.");
+            }
+        });
     }
 });
 
 $(function() {
-    window.manager = CardManager();
+    if (!window.manager)
+        window.manager = CardManager();
 })

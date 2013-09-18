@@ -184,7 +184,3 @@ CardMenu = Tea.Container.extend({
             .addClass('hidden');
     }
 });
-
-$(function() {
-    var menu = CardMenu({});
-})

@@ -1,4 +1,4 @@
-import os, mimetypes, urllib
+import os, mimetypes, urllib, json
 
 from django.http import HttpResponse, Http404
 from django.shortcuts import render, get_object_or_404, render_to_response, redirect
@@ -50,6 +50,8 @@ def card(request, path):
     if mime.startswith('image/'):
         with open(path) as file:
             return HttpResponse(file.read(), mimetype=mime)
+    if (request.GET.get('render') == 'yes'):
+        return render_card(request, path)
     card, _ = Card.objects.get_or_create(path=path)
     template = Template( card.source )
     context = RequestContext( request, locals() )
@@ -60,13 +62,17 @@ def card(request, path):
     )
     response['name'] = card.name
     response['path'] = card.relative
+    if card.is_valid():
+        response['is_valid'] = "yes" 
+    else:
+        response['is_valid'] = "no"
     return response
 
 
 def render_card(request, path):
-    card, _ = Card.objects.get_or_create(path=path)
+    card = Card.objects.get(path=path)
     template = Template( card.source )
-    context = Context( locals() )
+    context = RequestContext( request, locals() )
     source = template.render( context )
     return render(request, "deck/render.html", locals())
 
@@ -82,16 +88,48 @@ def build_snapshots(request):
         qs = Card.objects.all()
 
     cards = {}
+    images = []
     for card in qs:
-        url = "http://%s/%s" % (host, card.url)
+        url = "http://%s%s?render=yes" % (host, card.url)
         cards[url] = card
 
     for url, src in take_shots(cards.keys()):
         url = url.replace(" ", "%20")
-        cards[url].save_shot(src)
+        images.append( cards[url].save_shot(src) )
 
-    return HttpResponse("Ok")
+    response = HttpResponse(json.dumps(images), mimetype="application/json")
+    if (path):
+        card = Card.objects.get(path=path)
+        if card.is_valid():
+            response['is_valid'] = "yes" 
+        else:
+            response['is_valid'] = "no"
+        print response['is_valid']
+    return response
 
 
 def container(request):
     return render(request, "deck/container.html", locals())
+
+
+def validate(request):
+    path = request.GET.get('path')
+    DECK_PATH = os.path.abspath( getattr(settings, 'DECK_PATH', 'decks') )
+    path = os.path.join(DECK_PATH, path)
+    card = get_object_or_404(Card, path=path)
+    if (not card.shot):
+        host = request.get_host()
+        for url, src in take_shots(["http://%s%s?render=yes" % (host, card.url)]):
+            card.save_shot(src)
+    card.validate()
+    return HttpResponse(json.dumps(True), mimetype="application/json")
+
+
+def invalidate(request):
+    path = request.GET.get('path')
+    DECK_PATH = os.path.abspath( getattr(settings, 'DECK_PATH', 'decks') )
+    path = os.path.join(DECK_PATH, path)
+    card = get_object_or_404(Card, path=path)
+    card.invalidate()
+    return HttpResponse(json.dumps(True), mimetype="application/json")
+

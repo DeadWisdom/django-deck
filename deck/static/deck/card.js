@@ -70,6 +70,10 @@ Card = Tea.Element.extend({
 
         this.scaffold.doLayout();
     },
+    setWidth : function(w) {
+        this.source.width(w);
+        this.scaffold.doLayout();
+    },
     appear : function() {
         if (this.hidden) return false;
         
@@ -99,11 +103,13 @@ Card = Tea.Element.extend({
     hide : function() {
         this.hidden = true;
         this.source.hide();
+        this.scaffold.hide();
         window.manager.saveValue(this.name + ":hidden", true);
     },
     show : function() {
         this.hidden = false;
         this.appear();
+        this.scaffold.show();
         window.manager.saveValue(this.name + ":hidden", '');
     }
 });
