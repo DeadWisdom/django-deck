@@ -51,6 +51,10 @@ body {
 	padding-left: 0px;
 }
 
+.menu .t-tail {
+    padding-top: 2px;
+}
+
 .menu .t-tail .t-button {
     color: #666;
     text-decoration: none;
@@ -61,6 +65,12 @@ body {
     border: none;
     float: none;
     padding-left: 10px;
+    padding-right: 0;
+    margin-right: 0;
+}
+
+.hidden .principal {
+    display: none;
 }
 
 .menu .t-tail .t-tail .t-button {
@@ -69,6 +79,13 @@ body {
 
 .menu .t-tail .t-icon {
     display: none
+}
+
+.menu .t-button .t-icon {
+    display: block;
+    float: right;
+    margin-top: 0px;
+    margin-right: 10px;
 }
 
 .menu .principal > .t-text, .menu .principal > .t-tick {
@@ -180,6 +197,7 @@ body {
     border: 1px solid #DDD;
 }
 
+.icon-none { background: transparent !important; }
 .icon-invalid { background-image: url("images/alert-icon.png") !important; }
 .icon-valid { background-image: url("images/icon-valid.png") !important; }
 .icon-left { background-image: url("images/icon-left.png") !important; }

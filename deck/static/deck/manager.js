@@ -241,9 +241,11 @@ CardManager = Tea.Class({
         this.menu.verify.setText("verifying...");
         this.menu.verify.disable();
     },
-    invalidate : function() {
+    invalidate : function(path) {
         this.hud.buttons.validate.disable();
         this.hud.buttons.validate.setIcon('loading');
+
+        path = path || this.card.name;
 
         $.ajax({
             url: '/deck/invalidate/',
@@ -251,6 +253,8 @@ CardManager = Tea.Class({
             context: this,
             success: function() {
                 this.hud.buttons.validate.setValue(false);
+
+                this.menu.invalidate(path);
             },
             complete : function() {
                 this.hud.buttons.validate.enable();
@@ -260,19 +264,25 @@ CardManager = Tea.Class({
             }
         });
     },
-    validate : function() {
+    validate : function(path) {
         this.hud.buttons.validate.disable();
         this.hud.buttons.validate.setIcon('loading');
 
+        path = path || this.card.name;
+
         $.ajax({
             url: '/deck/validate/',
-            data: {path: this.card.name},
+            data: {path: path},
             context: this,
             success: function() {
-                this.hud.buttons.validate.setValue(true);
+                if (this.card.name == path)
+                    this.hud.buttons.validate.setValue(true);
+
+                this.menu.validate(path);
             },
             complete : function() {
-                this.hud.buttons.validate.enable();
+                if (this.card.name == path)
+                    this.hud.buttons.validate.enable();
             },
             error : function() {
                 alert("Could not talk to the server.");

@@ -12,7 +12,7 @@ Card = Tea.Element.extend({
         this.hook(this, 'move', this.onMove);
         this.hook(this.source, 'load', this.onFrameLoad);
         this.source.hide().appendTo(document.body);
-
+        
         this.scaffold = Scaffold({
             subject: this
         });
@@ -113,88 +113,3 @@ Card = Tea.Element.extend({
         window.manager.saveValue(this.name + ":hidden", '');
     }
 });
-
-/*
-    Manager - loadCard
-        if the card is not ready:
-            wait until it is
-        if the card have a saved rect:
-            set the rect of the card
-            set the html of the card
-            set the name of the card
-            have the card fade in
-        if the card doesn't have a saved rect:
-            set the html of the card
-            set the name of the card
-            position off-camera
-            autosize the card
-            hide the card
-            autoposition the card
-            have the card fade in
-        for each overlay:
-            set the name of the overlay
-            if the overlay has a saved rect:
-                set the rect of the overlay    
-            
-            
-
-        UNOOP
-        BEHAVIORS
-        EVENTS
-        SOURCE
-
-
-
-function Card(frame) {
-    this.source = $(frame);
-    //this.scaffold = new Scaffold("card", this.source);
-    this.source.scaffold();
-
-    this.name = null;
-    this.html = null;
-    this._ready = false;
-
-    this.source.on('load', jQuery.proxy(this.onFrameLoad, this) );
-    this.source.on('moved', jQuery.proxy(this.onMoved, this) );
-    this.source.hide();
-}
-
-$.extend(Card.prototype, {
-    teardown : function(index) {
-        this.source.hide((index + 1) * 200);
-    },
-    appear : function(index, css) {
-        this.source
-                .css(css)
-                .hide()
-                .fadeIn((index + 1) * 200);
-        
-        this.source.css( {position: 'absolute', top: 100, left: 100} );
-        this.source.trigger('transform');
-       // this.scaffold.doLayout();
-    },
-    setHTML : function(html) {
-        this.html = html;
-        if (!this._ready) return;
-
-        $(this.source[0].contentWindow.document.body).empty().append(html);
-        this.source.show();
-        
-       // this.scaffold.autoSize();
-    },
-    setName : function(name) {
-        this.name = name
-        if (!this._ready) return;
-
-        // this.scaffold.setName(name);
-    },
-    onFrameLoad : function() {
-        this._ready = true;
-        if (this.name) this.setName(this.name);
-        if (this.html) this.setHTML(this.html);
-    },
-    onMoved : function() {
-        window.manager.saveRect(this.name, this.source);
-    }
-});
-*/  

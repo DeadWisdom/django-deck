@@ -101,11 +101,19 @@ class CardGroup(object):
         self.path = os.path.abspath(path)
 
     def simple(self):
+        cards = [c.simple() for c in self.cards()]
+        groups = [g.simple() for g in self.groups()]
+        is_valid = None
+        for o in groups + cards:
+            if o['is_valid'] == False:
+                is_valid = False
+                break
         return {
             'path': self.path,
             'name': self.name,
-            'groups': [g.simple() for g in self.groups()],
-            'cards': [c.simple() for c in self.cards()]
+            'groups': groups,
+            'cards': cards,
+            'is_valid': is_valid
         }
 
     def json(self):

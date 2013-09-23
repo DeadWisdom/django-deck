@@ -51,11 +51,42 @@ CardSearch = Tea.Container.extend({
     }
 })
 
+CardButton = Tea.Button.extend({
+    type: 'card-button',
+    cls: 't-button card-button',
+    icon: 'none',
+    card: null,
+    init : function() {
+        this.__super__();
+
+        this.source.attr( {href: '#/' + this.card.path} );
+        if (this.card.is_valid == false) this.setIcon('invalid');
+
+        this.hook(this._icon, 'click', function() {
+            this.setIcon('none');
+            manager.validate(this.card.path);
+            return false;
+        });
+    },
+    validate : function(path) {
+        if (this.card.path == path) {
+            this.setIcon('none');
+        }
+    },
+    invalidate : function(path) {
+        if (this.card.path == path) {
+            this.setIcon('invalid');
+            return true;
+        }
+    }
+})
+
 CardTree = Tea.Tree.extend({
     type: 'card-tree',
     group: null,
     expanded: false,
     full_paths: false,
+    icon: 'none',
     init : function() {
         this.__super__();
         this.trees = [];
@@ -64,6 +95,10 @@ CardTree = Tea.Tree.extend({
             this.setText(this.group.name);
             this.addGroups(this.group.groups);
             this.addCards(this.group.cards);
+
+            if (this.group.is_valid == false) {
+                this.setIcon('invalid');
+            }
         } else {
             this.setText('');
         }
@@ -75,16 +110,16 @@ CardTree = Tea.Tree.extend({
         for(var i = 0; i < groups.length; i++) {
             this.trees.push( this.tail.append({
                 type: 'card-tree',
-                group: groups[i],
+                group: groups[i]
             }) );
         }
     },
     addCards : function(cards) {
         for(var i = 0; i < cards.length; i++) {
             this.tail.append({
-                type: 't-button',
-                text: this.full_paths ? cards[i].path : cards[i].name,
-                attr: {href: '#/' + cards[i].path}
+                type: 'card-button',
+                card: cards[i],
+                text: this.full_paths ? cards[i].path : cards[i].name
             });
         }
     },
@@ -104,6 +139,34 @@ CardTree = Tea.Tree.extend({
     empty : function() {
         this.trees = [];
         this.tail.empty();
+    },
+    validate : function(url) {
+        var self = this;
+        var has_invalid = false;
+        this.tail.each(function(i, item) {
+            if (item.validate(url));
+                has_invalid = true;
+        });
+
+        if (has_invalid) {
+            this.setIcon('invalid');
+        } else {
+            this.setIcon('none');
+        }
+    },
+    invalidate : function(url) {
+        var self = this;
+        var has_invalid = false;
+        this.tail.each(function(i, item) {
+            if (item.invalidate(url));
+                has_invalid = true;
+        });
+
+        if (has_invalid) {
+            this.setIcon('invalid');
+        } else {
+            this.setIcon('none');
+        }
     }
 });
 
@@ -182,5 +245,11 @@ CardMenu = Tea.Container.extend({
         this.source
             .css('left', -320)
             .addClass('hidden');
+    },
+    validate : function(path) {
+        this.tree.validate(path);
+    },
+    invalidate : function(path) {
+        this.tree.invalidate(path);
     }
 });

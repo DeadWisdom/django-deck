@@ -94,7 +94,7 @@ def build_snapshots(request):
         cards[url] = card
 
     for url, src in take_shots(cards.keys()):
-        url = url.replace(" ", "%20")
+        url, _, _ = url.replace(" ", "%20").partition('#')
         images.append( cards[url].save_shot(src) )
 
     response = HttpResponse(json.dumps(images), mimetype="application/json")
