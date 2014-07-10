@@ -43,6 +43,7 @@ def overlay(request, path):
 
 def card(request, path):
     DECK_PATH = os.path.abspath( getattr(settings, 'DECK_PATH', 'decks') )
+    asset_template = getattr(settings, 'DECK_ASSET_TEMPLATE', 'assets.html')
     path = os.path.join(DECK_PATH, path)
     if not os.path.exists(path) or not path.startswith(DECK_PATH):
         raise Http404
@@ -74,6 +75,7 @@ def render_card(request, path):
     template = Template( card.source )
     context = RequestContext( request, locals() )
     source = template.render( context )
+    asset_template = getattr(settings, 'DECK_ASSET_TEMPLATE', 'assets.html')
     return render(request, "deck/render.html", locals())
 
 
@@ -109,6 +111,7 @@ def build_snapshots(request):
 
 
 def container(request):
+    asset_template = getattr(settings, 'DECK_ASSET_TEMPLATE', 'assets.html')
     return render(request, "deck/container.html", locals())
 
 

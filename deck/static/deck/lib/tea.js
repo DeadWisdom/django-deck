@@ -824,7 +824,7 @@ Tea.Form = Tea.Fieldset.extend({
             method: this.method
         });
 
-        this._submit = $('<input type="submit" class="t-submit t-hide"/>').appendTo(source);
+        this.insertBefore = this._submit = $('<input type="submit" class="t-submit t-hide"/>').appendTo(source);
 
         this.hook(source, 'submit', this.triggerSubmit);
 
