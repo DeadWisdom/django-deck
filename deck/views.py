@@ -38,7 +38,7 @@ def overlay(request, path):
         raise Http404
     mime = mimetypes.guess_type(path)[0]
     with open(path) as file:
-        return HttpResponse(file.read(), mimetype=mime)
+        return HttpResponse(file.read(), content_type=mime)
 
 
 def card(request, path):
@@ -50,7 +50,7 @@ def card(request, path):
     mime = mimetypes.guess_type(path)[0]
     if mime.startswith('image/'):
         with open(path) as file:
-            return HttpResponse(file.read(), mimetype=mime)
+            return HttpResponse(file.read(), content_type=mime)
     if (request.GET.get('render') == 'yes'):
         return render_card(request, path)
     card, _ = Card.objects.get_or_create(path=path)
@@ -99,7 +99,7 @@ def build_snapshots(request):
         url, _, _ = url.replace(" ", "%20").partition('#')
         images.append( cards[url].save_shot(src) )
 
-    response = HttpResponse(json.dumps(images), mimetype="application/json")
+    response = HttpResponse(json.dumps(images), content_type="application/json")
     if (path):
         card = Card.objects.get(path=path)
         if card.is_valid():
@@ -125,7 +125,7 @@ def validate(request):
         for url, src in take_shots(["http://%s%s?render=yes" % (host, card.url)]):
             card.save_shot(src)
     card.validate()
-    return HttpResponse(json.dumps(True), mimetype="application/json")
+    return HttpResponse(json.dumps(True), content_type="application/json")
 
 
 def invalidate(request):
@@ -134,5 +134,5 @@ def invalidate(request):
     path = os.path.join(DECK_PATH, path)
     card = get_object_or_404(Card, path=path)
     card.invalidate()
-    return HttpResponse(json.dumps(True), mimetype="application/json")
+    return HttpResponse(json.dumps(True), content_type="application/json")
 
